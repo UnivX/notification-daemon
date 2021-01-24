@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="File di risorse">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Code">
+      <UniqueIdentifier>{30fadf05-4903-4b91-b7c8-83f672c3b0eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\File di origine">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Code\ResourcesGestion">
+      <UniqueIdentifier>{0e00f115-b323-4ba3-a6fa-673101f47a83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\RenderingFiles">
+      <UniqueIdentifier>{884f2da3-282f-4160-875d-0ee42159bfcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SocketFiles">
+      <UniqueIdentifier>{cf16513a-fe74-4100-8097-aa79d01b7550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\NotificationFiles">
+      <UniqueIdentifier>{19e5b2ee-06a4-454b-95ef-850b9c42141a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\API">
+      <UniqueIdentifier>{d8835455-d0bb-4c10-aa75-969e863ec53a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Origine.cpp">
+      <Filter>Code\File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketWatchDog.cpp">
+      <Filter>Code\SocketFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketThread.cpp">
+      <Filter>Code\SocketFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlayWindow.cpp">
+      <Filter>Code\RenderingFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureResource.cpp">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClCompile>
+    <ClCompile Include="FontResource.cpp">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderingObject.cpp">
+      <Filter>Code\RenderingFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderingThread.cpp">
+      <Filter>Code\RenderingFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Notification.cpp">
+      <Filter>Code\NotificationFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="API.cpp">
+      <Filter>Code\API</Filter>
+    </ClCompile>
+    <ClCompile Include="utilities.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="NotificatonBluePrintResource.cpp">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClCompile>
+    <ClCompile Include="Animations.cpp">
+      <Filter>Code\NotificationFiles</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SocketWatchDog.h">
+      <Filter>Code\SocketFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketThread.h">
+      <Filter>Code\SocketFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlayWindow.h">
+      <Filter>Code\RenderingFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureResource.h">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClInclude>
+    <ClInclude Include="FontResource.h">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingObject.h">
+      <Filter>Code\RenderingFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingThread.h">
+      <Filter>Code\RenderingFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Notification.h">
+      <Filter>Code\NotificationFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="API.h">
+      <Filter>Code\API</Filter>
+    </ClInclude>
+    <ClInclude Include="NotificatonBluePrintResource.h">
+      <Filter>Code\ResourcesGestion</Filter>
+    </ClInclude>
+    <ClInclude Include="Animations.h">
+      <Filter>Code\NotificationFiles</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
