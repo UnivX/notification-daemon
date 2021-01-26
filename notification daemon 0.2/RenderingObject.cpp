@@ -42,10 +42,12 @@ void SpriteObject::SetColor(sf::Color color)
 TextObject::TextObject(sf::Font* font)
 {
 	this->text.setFont(*font);
+	this->text.setStyle(sf::Text::Regular);
 }
 
 sf::Drawable* TextObject::GetDrawableObject()
 {
+	std::string str = this->text.getString();
 	return &this->text;
 }
 

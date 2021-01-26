@@ -1,5 +1,5 @@
 #include "FontResource.h"
-
+#include <iostream>
 
 
 FontResource::FontResource(std::string name)
@@ -20,6 +20,7 @@ bool FontResource::LoadFromFile(std::string path)
 
 FontResource::~FontResource()
 {
+	std::cout << "fdsafsa";
 }
 
 sf::Font* FontResource::GetFont()

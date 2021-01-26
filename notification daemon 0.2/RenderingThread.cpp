@@ -51,6 +51,28 @@ void RenderingThread::PlayNotification(Notification* notification)
 
 void RenderingThread::Main()
 {
+	/*
+	sf::Text text;
+	sf::Font font;
+	font.loadFromFile("C:\\Users\\SIMONE\\Desktop\\Notification\\Candara.ttf");
+
+	// select the font
+	text.setFont(font); // font is a sf::Font
+
+	// set the string to display
+	text.setString("Hello world");
+
+	// set the character size
+	text.setCharacterSize(24); // in pixels, not points!
+
+	// set the color
+	text.setFillColor(sf::Color::Red);
+
+	// set the text style
+	text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
+	text.setPosition(sf::Vector2f(0, 0));	
+	*/
 	sf::Clock clock;
 	while (this->m_run) {
 		//notification queue things
@@ -106,7 +128,7 @@ void RenderingThread::Main()
 			if (this->runningNotification != nullptr)
 				this->runningNotification->RenderAll(*this->window);
 			this->notificationQueueMutex.unlock();
-
+			//window->draw(text);
 			window->display();
 		}
 		else

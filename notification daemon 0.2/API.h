@@ -28,6 +28,7 @@ private:
 	std::string AddRectangleToNotificationResource(std::string msg);
 	std::string AddCircleToNotificationResource(std::string msg);
 	std::string AddSpriteToNotificationResource(std::string msg);
+	std::string AddTextToNotificationResource(std::string msg);
 
 	std::string PopUpNotification(std::string msg);
 

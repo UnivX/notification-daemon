@@ -81,6 +81,9 @@ void Api::ElaborateMessage(std::string msg, SocketThread& thread)
 	else if (code == "add_sprite_to_notification_resource")
 		response = this->AddSpriteToNotificationResource(msg);
 
+	else if (code == "add_text_to_notification_resource")
+		response = this->AddTextToNotificationResource(msg);
+
 	else if (code == "end_notification_resource_creation")
 		response = this->EndNotificationResourceCreation(msg);
 
@@ -359,6 +362,10 @@ std::string Api::AddSpriteToNotificationResource(std::string msg)
 		errors = true;
 	else {
 		sf::Texture* texture = resourcePtr->GetTexture();
+		if (texture == nullptr) {
+			errors = true;
+			return "{\"return_status\":\"failed\"}";
+		}
 		auto sprite = new SpriteObject(texture);
 		/*calculate scale for have the right size*/
 		float scaleY = size.y / texture->getSize().y;
@@ -369,6 +376,83 @@ std::string Api::AddSpriteToNotificationResource(std::string msg)
 		tempNotificationPtr->GetBaseLayer()->AddObject(sprite, position);
 	}
 
+	if (!errors)
+		return "{\"return_status\":\"done\"}";
+	else
+		return "{\"return_status\":\"failed\"}";
+}
+
+std::string Api::AddTextToNotificationResource(std::string msg)
+{
+	bool errors = false;
+
+	sf::Vector2f position;
+	if (!GetValueFromMessage(msg, "position.x", position.x))
+		errors = true;
+	if (!GetValueFromMessage(msg, "position.y", position.y))
+		errors = true;
+
+	float character_size;
+	if (!GetValueFromMessage(msg, "character_size", character_size))
+		errors = true;
+
+	sf::Color fill_color;
+	unsigned int rgb = 0;
+	if (!GetValueFromMessage(msg, "fill_color.r", rgb))
+		errors = true;
+	fill_color.r = rgb;
+	if (!GetValueFromMessage(msg, "fill_color.g", rgb))
+		errors = true;
+	fill_color.g = rgb;
+	if (!GetValueFromMessage(msg, "fill_color.b", rgb))
+		errors = true;
+	fill_color.b = rgb;
+
+	sf::Color outline_color;
+	if (!GetValueFromMessage(msg, "outline_color.r", rgb))
+		errors = true;
+	outline_color.r = rgb;
+	if (!GetValueFromMessage(msg, "outline_color.g", rgb))
+		errors = true;
+	outline_color.g = rgb;
+	if (!GetValueFromMessage(msg, "outline_color.b", rgb))
+		errors = true;
+	outline_color.b = rgb;
+
+	float outline_thickness;
+	if (!GetValueFromMessage(msg, "outline_thickness", outline_thickness))
+		errors = true;
+
+	std::string name;
+	if (!GetValueFromMessage(msg, "name", name))
+		errors = true;
+
+	std::string string;
+	if (!GetValueFromMessage(msg, "string", string))
+		errors = true;
+
+	std::string font_name;
+	if (!GetValueFromMessage(msg, "font_name", font_name))
+		errors = true;
+
+	auto resourcePtr = std::static_pointer_cast<FontResource>(resourceManagerInstance->GetListByName("Fonts")->SearchResource(font_name));
+	if (resourcePtr == nullptr)
+		errors = true;
+	else {
+		sf::Font* font = resourcePtr->GetFont();
+		if (font == nullptr) {
+			errors = true;
+			return "{\"return_status\":\"failed\"}";
+		}
+		auto text = new TextObject(font);
+		text->SetCharacterSize(character_size);
+		text->SetFillColor(fill_color);
+		text->SetName(name);
+		//text->SetOutLineColor(outline_color);
+		//text->SetOutLineThickness(outline_thickness);
+		text->SetString(string);
+		tempNotificationPtr->GetBaseLayer()->AddObject(text, position);
+	}
 	if (!errors)
 		return "{\"return_status\":\"done\"}";
 	else

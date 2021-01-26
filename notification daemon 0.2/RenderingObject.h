@@ -9,10 +9,10 @@ all the memory gestion is responsibility of the derived class
 */
 enum ObjectType
 {
-	Sprite,
-	Text,
-	Rectangle,
-	Circle,
+	ObjSprite,
+	ObjText,
+	ObjRectangle,
+	ObjCircle,
 };
 
 class RenderingObject {
@@ -53,7 +53,7 @@ public:
 	sf::Transformable* GetTransformableObject();
 	void SetColor(sf::Color color);
 	RenderingObject* CreateDynamicCopy() { return new SpriteObject(*this); };
-	ObjectType GetType() { return ObjectType::Sprite; };
+	ObjectType GetType() { return ObjectType::ObjSprite; };
 private:
 	sf::Sprite sprite;
 };
@@ -69,7 +69,7 @@ public:
 	void SetFillColor(sf::Color color);
 	void SetOutLineColor(sf::Color color);
 	RenderingObject* CreateDynamicCopy() { return new TextObject(*this); };
-	ObjectType GetType() { return ObjectType::Text; };
+	ObjectType GetType() { return ObjectType::ObjText; };
 private:
 	sf::Text text;
 };
@@ -84,7 +84,7 @@ public:
 	void SetFillColor(sf::Color color);
 	void SetOutLineColor(sf::Color color);
 	RenderingObject* CreateDynamicCopy() { return new RectangleObject(*this); };
-	ObjectType GetType() { return ObjectType::Rectangle; };
+	ObjectType GetType() { return ObjectType::ObjRectangle; };
 private:
 	sf::RectangleShape shape;
 };
@@ -99,7 +99,7 @@ public:
 	void SetFillColor(sf::Color color);
 	void SetOutLineColor(sf::Color color);
 	RenderingObject* CreateDynamicCopy() { return new CircleObject(*this); };
-	ObjectType GetType() { return ObjectType::Circle; };
+	ObjectType GetType() { return ObjectType::ObjCircle; };
 private:
 	sf::CircleShape shape;
 };
