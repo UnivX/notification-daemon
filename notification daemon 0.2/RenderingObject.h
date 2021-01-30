@@ -20,6 +20,7 @@ public:
 	virtual sf::Drawable* GetDrawableObject() = 0;
 	virtual sf::Transformable* GetTransformableObject() = 0;
 	virtual RenderingObject* CreateDynamicCopy() = 0;
+	virtual bool ChangeValue(std::string value_name, std::string value) { return false; };
 	std::string GetName();
 	void SetName(std::string name);
 	virtual ObjectType GetType() = 0;
@@ -43,7 +44,9 @@ private:
 	sf::Vector2f position;
 	std::vector<std::pair<RenderingObject*, sf::Vector2f>> vector;//vector cointain objects paired with the respective local position
 };
-
+/*
+Modificable values: none
+*/
 class SpriteObject : public RenderingObject {
 public:
 	SpriteObject(sf::Texture* texture);
@@ -56,9 +59,13 @@ private:
 	sf::Sprite sprite;
 };
 
+/*
+Modificable values: string
+*/
 class TextObject : public RenderingObject {
 public:
 	TextObject(sf::Font* font);
+	bool ChangeValue(std::string value_name, std::string value);
 	sf::Drawable* GetDrawableObject();
 	sf::Transformable* GetTransformableObject();
 	void SetCharacterSize(unsigned int size);
@@ -73,6 +80,9 @@ private:
 	sf::Text text;
 };
 
+/*
+Modificable values: none
+*/
 class RectangleObject : public RenderingObject {
 public:
 	RectangleObject();
@@ -88,6 +98,9 @@ private:
 	sf::RectangleShape shape;
 };
 
+/*
+Modificable values: none
+*/
 class CircleObject : public RenderingObject {
 public:
 	CircleObject();

@@ -470,8 +470,37 @@ std::string Api::PopUpNotification(std::string msg)
 
 	if (notificationBluePrint == nullptr)
 		errors = true;
-	else
-		renderingThread->PlayNotification(notificationBluePrint->GetNotificationCopy());
+	else {
+		auto newNotification = notificationBluePrint->GetNotificationCopy();
+		int changes = 0;
+		if (GetValueFromMessage(msg, "changes", changes)) {
+			for (int i = 0; i < changes; i++) {
+
+				std::string change_obj_name = "";
+				if (!GetValueFromMessage(msg, "change" + std::to_string(i) + "_object_name", change_obj_name)) {//"change0_object_name
+					errors = true;
+					break;
+				}
+
+				std::string change_value_name = "";
+				if (!GetValueFromMessage(msg, "change" + std::to_string(i) + "_value_name", change_value_name)) {//"change0_value_name
+					errors = true;
+					break;
+				}
+
+				std::string change_value = "";
+				if (!GetValueFromMessage(msg, "change" + std::to_string(i) + "_value", change_value)) {//"change0_value
+					errors = true;
+					break;
+				}
+				for (int j = 0; j < newNotification->GetBaseLayer()->GetVector()->size(); j++) {
+					if ((*newNotification->GetBaseLayer()->GetVector())[j].first->GetName() == change_obj_name)
+						(*newNotification->GetBaseLayer()->GetVector())[j].first->ChangeValue(change_value_name, change_value);
+				}
+			}
+		}
+		renderingThread->PlayNotification(newNotification);
+	}
 
 	if (!errors)
 		return "{\"return_status\":\"done\"}";

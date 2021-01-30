@@ -1,4 +1,5 @@
 #include "RenderingObject.h"
+#include "API.h"
 
 RenderingObject::RenderingObject()
 {
@@ -43,6 +44,14 @@ TextObject::TextObject(sf::Font* font)
 {
 	this->text.setFont(*font);
 	this->text.setStyle(sf::Text::Regular);
+}
+
+bool TextObject::ChangeValue(std::string value_name, std::string value)
+{
+	if (value_name == "string") {
+		this->text.setString(value);
+	}
+	return false;
 }
 
 sf::Drawable* TextObject::GetDrawableObject()

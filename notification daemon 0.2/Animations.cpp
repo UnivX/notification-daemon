@@ -43,4 +43,6 @@ void BaseAnimationFunction::Function(sf::Vector2f& position, bool& ended, float 
 			}
 		}
 	}
+	if (position.x == -INFINITY || position.x == INFINITY)
+		ended = true;
 }
