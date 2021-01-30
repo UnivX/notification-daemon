@@ -47,7 +47,6 @@ TextObject::TextObject(sf::Font* font)
 
 sf::Drawable* TextObject::GetDrawableObject()
 {
-	std::string str = this->text.getString();
 	return &this->text;
 }
 
@@ -79,6 +78,11 @@ void TextObject::SetFillColor(sf::Color color)
 void TextObject::SetOutLineColor(sf::Color color)
 {
 	this->text.setOutlineColor(color);
+}
+
+void TextObject::SetFont(sf::Font* font)
+{
+	this->text.setFont(*font);
 }
 
 RectangleObject::RectangleObject()

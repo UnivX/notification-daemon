@@ -21,8 +21,6 @@
 /*
 TODO
 -implent the variables on the notification class for more reusable notification blueprint
--create a system for dynamic window size in base of the notification
--create the api for loading the resources and render the notification
 -BIG FEATURE: make it for linux
 */
 void Init() {

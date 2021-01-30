@@ -1,6 +1,7 @@
 #include "RenderingThread.h"
-
-
+#include "FontResource.h"
+#include "ResourceManager.h"
+#include <memory>
 
 RenderingThread::RenderingThread()
 {
@@ -73,6 +74,15 @@ void RenderingThread::Main()
 
 	text.setPosition(sf::Vector2f(0, 0));	
 	*/
+	sf::Font font;
+	font.loadFromFile("C:\\Users\\SIMONE\\Desktop\\Notification\\Candara.ttf");
+	auto text = new TextObject(&font);
+	text->SetCharacterSize(11);
+	text->SetFillColor(sf::Color::Black);
+	text->SetName("test");
+	//text->SetOutLineColor(outline_color);
+	//text->SetOutLineThickness(outline_thickness);
+	text->SetString("this is a test");
 	sf::Clock clock;
 	while (this->m_run) {
 		//notification queue things
@@ -127,6 +137,7 @@ void RenderingThread::Main()
 			this->notificationQueueMutex.lock();
 			if (this->runningNotification != nullptr)
 				this->runningNotification->RenderAll(*this->window);
+			//window->draw(*text->GetDrawableObject());
 			this->notificationQueueMutex.unlock();
 			//window->draw(text);
 			window->display();

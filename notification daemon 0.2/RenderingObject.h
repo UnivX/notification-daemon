@@ -1,8 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-//TODO implement father/child position system (local position)
-
 /*
 this is a pure virtual class, is the base for rendering objects
 all the memory gestion is responsibility of the derived class
@@ -68,6 +66,7 @@ public:
 	void SetOutLineThickness(float thickness);
 	void SetFillColor(sf::Color color);
 	void SetOutLineColor(sf::Color color);
+	void SetFont(sf::Font *font);
 	RenderingObject* CreateDynamicCopy() { return new TextObject(*this); };
 	ObjectType GetType() { return ObjectType::ObjText; };
 private:

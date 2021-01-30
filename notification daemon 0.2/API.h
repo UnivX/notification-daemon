@@ -76,3 +76,26 @@ inline bool GetValueFromMessage(std::string message, std::string variable, T& va
 		MessageBoxA(NULL, "Notification Daemon, GetValueFromMessage failed", exc.what(), MB_ICONERROR);
 	}
 }
+
+
+inline bool GetValueFromMessage(std::string message, std::string variable, std::string& value){
+	try
+	{
+		variable = "\"" + variable + "\"";
+		auto position = message.find(variable.c_str());
+		auto firstPosition = message.find('"', position + variable.size() + 1);
+		auto secondPosition = message.find('"', firstPosition + 1);
+		if (position == std::string::npos || firstPosition == std::string::npos || secondPosition == std::string::npos)
+			return false;
+		std::stringstream ss;
+		value = message.substr(firstPosition + 1, secondPosition - firstPosition - 1);
+		replaceAll(value, "\\\\n", "\\n");//do the \n method
+		replaceAll(value, "\\n", "\n");//do the \n method
+
+		return true;
+	}
+	catch (const std::exception & exc)
+	{
+		MessageBoxA(NULL, "Notification Daemon, GetValueFromMessage<std::string> failed", exc.what(), MB_ICONERROR);
+	}
+}
