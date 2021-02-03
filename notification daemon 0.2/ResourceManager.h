@@ -32,6 +32,7 @@ public:
 	void RemoveResource(std::shared_ptr<Resource> resource);
 	std::string GetName();
 	void SetName(std::string name);
+	std::vector<std::shared_ptr<Resource>> GetList();
 private:
 	std::string m_name;
 	std::vector<std::shared_ptr<Resource>> resources;
@@ -50,6 +51,7 @@ public:
 	ResourceList* GetListByName(std::string name);
 	ResourceList* AddNewList(std::string name);
 	static ResourceManager* GetInstance();
+	std::vector<ResourceList*> GetList();
 private:
 	std::mutex listMutex;
 	static ResourceManager* instance;

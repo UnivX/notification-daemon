@@ -70,6 +70,7 @@ public:
 	sf::Transformable* GetTransformableObject();
 	void SetCharacterSize(unsigned int size);
 	void SetString(std::string str);
+	void SetWString(std::wstring str);
 	void SetOutLineThickness(float thickness);
 	void SetFillColor(sf::Color color);
 	void SetOutLineColor(sf::Color color);

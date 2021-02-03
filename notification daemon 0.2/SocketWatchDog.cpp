@@ -1,5 +1,6 @@
 #include "SocketWatchDog.h"
-
+#include <sstream>
+#include <exception>
 SocketWatchDog* SocketWatchDog::instance = nullptr;
 
 SocketWatchDog::SocketWatchDog()
@@ -7,6 +8,7 @@ SocketWatchDog::SocketWatchDog()
 	this->m_run = true;
 	this->m_thread = new std::thread(&SocketWatchDog::Main, this);
 	this->listeningSocket = nullptr;
+	this->errors_counter = 0;
 }
 
 
@@ -72,7 +74,15 @@ void SocketWatchDog::Main()
 					if (this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_NO_ERROR
 						&& this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_ERROR_RECV_FAILED
 						&& this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_ERROR_SEND_FAILED)//if some error appened
-						MessageBoxA(NULL, "a socket thread crashed", "ERROR", NULL);
+						this->errors_counter++;
+					else
+						this->errors_counter = 0;
+
+					if (this->errors_counter > 1000) {
+						MessageBoxA(NULL, ("dead loop of socket crashes " + std::to_string(WSAGetLastError())).c_str(), "ERROR", NULL);
+						throw std::exception("dead loop of socket crashes");
+						abort();
+					}
 
 					this->socketPool.erase(this->socketPool.begin());//erase from list
 				}

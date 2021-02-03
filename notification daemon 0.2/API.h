@@ -31,6 +31,7 @@ private:
 	std::string AddTextToNotificationResource(std::string msg);
 
 	std::string PopUpNotification(std::string msg);
+	std::string GetLoadedResources(std::string msg);
 
 	std::string	CloseDaemon();
 
@@ -50,7 +51,7 @@ struct RawMessages {
 };
 
 //use basic json data
-RawMessages GetMessages(SocketThread& thread);//Rework required
+RawMessages GetMessages(SocketThread& thread);//chek needed
 
 template<class T>
 bool GetValueFromMessage(std::string message, std::string variable, T& value);
@@ -64,6 +65,7 @@ inline bool GetValueFromMessage(std::string message, std::string variable, T& va
 		auto position = message.find(variable.c_str());
 		auto firstPosition = message.find('"', position + variable.size() + 1);
 		auto secondPosition = message.find('"', firstPosition + 1);
+
 		if (position == std::string::npos || firstPosition == std::string::npos || secondPosition == std::string::npos)
 			return false;
 		std::stringstream ss;
@@ -85,13 +87,20 @@ inline bool GetValueFromMessage(std::string message, std::string variable, std::
 		auto position = message.find(variable.c_str());
 		auto firstPosition = message.find('"', position + variable.size() + 1);
 		auto secondPosition = message.find('"', firstPosition + 1);
+
+		auto tempPos = firstPosition;
+		while (message[secondPosition - 1] == '\\') {
+			tempPos++;
+			secondPosition = message.find('"', tempPos + 1);
+		}
+
 		if (position == std::string::npos || firstPosition == std::string::npos || secondPosition == std::string::npos)
 			return false;
 		std::stringstream ss;
 		value = message.substr(firstPosition + 1, secondPosition - firstPosition - 1);
 		replaceAll(value, "\\\\n", "\\n");//do the \n method
 		replaceAll(value, "\\n", "\n");//do the \n method
-
+		replaceAll(value, "\\\"", "\"");//do the \" method
 		return true;
 	}
 	catch (const std::exception & exc)

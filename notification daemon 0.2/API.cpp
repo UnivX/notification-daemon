@@ -14,29 +14,76 @@ RawMessages GetMessages(SocketThread& thread)
 		rawMessages.errorsOnReciving = true;
 		return rawMessages;
 	}
-	ZeroMemory(recived, BLEN);
-	try
+	std::string allRecivedData;
+	//get all recived data
+	int doubles = 0;
+	
+
+	do
 	{
-		do
-		{
-			bool recvReturn = thread.Recv(recived);
-			if (recvReturn) {
-				std::string data(recived);
-				auto openGraphsLocations = findLocation(data, '{');
-				auto closeGraphsLocations = findLocation(data, '}');
-				openedMessages += openGraphsLocations.size() - closeGraphsLocations.size();
-				if (closeGraphsLocations.size() > 0)
-					for (int i = 0; i < closeGraphsLocations.size(); i++)
-						rawMessages.messages.emplace_back(data.substr(openGraphsLocations[i], closeGraphsLocations[i] - openGraphsLocations[i]));
-				if (openGraphsLocations.size() - closeGraphsLocations.size())
-					rawMessages.messages.emplace_back("{\"code\":\"error\", \"error\":\"invalid message sended\"}");
+		ZeroMemory(recived, BLEN);
+		bool recvReturn = thread.Recv(recived);
+		if (recvReturn) {
+			std::string data(recived);
+			//find open graphs
+			std::vector<int> openGraphsLocations;
+			doubles = 0;
+			for (int i = 0; i < data.size(); i++) {
+				if (i > 0 && data[i - 1] == '\\' && data[i] == '\"')
+					doubles--;
+				if (data[i] == '\"')
+					doubles++;
+				if (doubles % 2 == 0 && data[i] == '{')
+					openGraphsLocations.push_back(i);
 			}
-		} while (openedMessages > 0);
+
+			//find closed graphs
+			std::vector<int> closeGraphsLocations;
+			doubles = 0;
+			for (int i = 0; i < data.size(); i++) {
+				if (i > 0 && data[i - 1] == '\\' && data[i] == '\"')
+					doubles--;
+				if (data[i] == '\"')
+					doubles++;
+				if (doubles % 2 == 0 && data[i] == '}')
+					closeGraphsLocations.push_back(i);
+			}
+			openedMessages += openGraphsLocations.size() - closeGraphsLocations.size();
+			allRecivedData.append(data);
+		}
+		else//if timed out break the loop
+			break;
+
+	} while (openedMessages != 0);
+
+
+	//find open graphs
+	std::vector<int> openGraphsLocations;
+	doubles = 0;
+	for (int i = 0; i < allRecivedData.size(); i++) {
+		if (i > 0 && allRecivedData[i - 1] == '\\' && allRecivedData[i] == '\"')
+			doubles--;
+		if (allRecivedData[i] == '\"')
+			doubles++;
+		if (doubles % 2 == 0 && allRecivedData[i] == '{')
+			openGraphsLocations.push_back(i);
 	}
-	catch (const std::exception & exc)
-	{
-		MessageBoxA(NULL, "Notification Daemon, GetMessages failed", exc.what(), MB_ICONERROR);
+
+	//find closed graphs
+	std::vector<int> closeGraphsLocations;
+	doubles = 0;
+	for (int i = 0; i < allRecivedData.size(); i++) {
+		if (i > 0 && allRecivedData[i - 1] == '\\' && allRecivedData[i] == '\"')
+			doubles--;
+		if (allRecivedData[i] == '\"')
+			doubles++;
+		if (doubles % 2 == 0 && allRecivedData[i] == '}')
+			closeGraphsLocations.push_back(i);
 	}
+
+	for (int i = 0; i < closeGraphsLocations.size(); i++)
+		rawMessages.messages.emplace_back(allRecivedData.substr(openGraphsLocations[i], closeGraphsLocations[i] - openGraphsLocations[i]+1));
+
 	free(recived);
 	return rawMessages;
 }
@@ -92,6 +139,9 @@ void Api::ElaborateMessage(std::string msg, SocketThread& thread)
 
 	else if (code == "close_daemon")
 		response = this->CloseDaemon();
+
+	else if (code == "get_loaded_resources")
+		response = this->GetLoadedResources(msg);
 
 	else
 		strcpy(sendBuffer, "{\"return_status\":\"failed\"}");//if the code is none one of the known
@@ -149,6 +199,8 @@ std::string Api::StartNotificationResourceCreation(std::string msg)
 
 std::string Api::EndNotificationResourceCreation(std::string msg)
 {
+	if(tempNotificationPtr == nullptr)
+		return "{\"return_status\":\"failed\"}";
 	auto resource = std::make_shared<NotificationBluePrintResource>(tempNotififcatonBluePrintName);
 	resource->LoadFromNotification(tempNotificationPtr);
 	resourceManagerInstance->GetListByName("NotificationBluePrints")->AddResource(resource);
@@ -166,6 +218,11 @@ std::string Api::LoadTextureResource(std::string msg)
 	std::string name;
 	if (!GetValueFromMessage(msg, "name", name))
 		errors = true;
+
+	//if it exist 
+	auto resourcePtr = std::static_pointer_cast<TextureResource>(resourceManagerInstance->GetListByName("Textures")->SearchResource(name));
+	if (resourcePtr != nullptr)
+		return "{\"return_status\":\"done\"}";
 
 	auto resource = std::make_shared<TextureResource>(name);
 	if (!resource->LoadFromFile(path))
@@ -189,6 +246,11 @@ std::string Api::LoadFontResource(std::string msg)
 	std::string name;
 	if (!GetValueFromMessage(msg, "name", name))
 		errors = true;
+
+	//if it exist 
+	auto resourcePtr = std::static_pointer_cast<FontResource>(resourceManagerInstance->GetListByName("Fonts")->SearchResource(name));
+	if (resourcePtr != nullptr)
+		return "{\"return_status\":\"done\"}";
 
 	auto resource = std::make_shared<FontResource>(name);
 	if (!resource->LoadFromFile(path))
@@ -255,7 +317,11 @@ std::string Api::AddRectangleToNotificationResource(std::string msg)
 	rectangle->SetOutLineColor(outline_color);
 	rectangle->SetOutLineThickness(outline_thickness);
 	rectangle->SetName(name);
-	tempNotificationPtr->GetBaseLayer()->AddObject(rectangle, position);
+	if (tempNotificationPtr == nullptr) {
+		errors = true;
+	}
+	else
+		tempNotificationPtr->GetBaseLayer()->AddObject(rectangle, position);
 
 	if (!errors)
 		return "{\"return_status\":\"done\"}";
@@ -314,7 +380,10 @@ std::string Api::AddCircleToNotificationResource(std::string msg)
 	circle->SetOutLineColor(outline_color);
 	circle->SetOutLineThickness(outline_thickness);
 	circle->SetName(name);
-	tempNotificationPtr->GetBaseLayer()->AddObject(circle, position);
+	if (tempNotificationPtr == nullptr)
+		errors = true;
+	else
+		tempNotificationPtr->GetBaseLayer()->AddObject(circle, position);
 
 	if (!errors)
 		return "{\"return_status\":\"done\"}";
@@ -373,7 +442,10 @@ std::string Api::AddSpriteToNotificationResource(std::string msg)
 		sprite->GetTransformableObject()->setScale(sf::Vector2f(scaleX, scaleY));
 		sprite->SetColor(color);
 		sprite->SetName(name);
-		tempNotificationPtr->GetBaseLayer()->AddObject(sprite, position);
+		if (tempNotificationPtr == nullptr)
+			errors = true;
+		else
+			tempNotificationPtr->GetBaseLayer()->AddObject(sprite, position);
 	}
 
 	if (!errors)
@@ -451,7 +523,10 @@ std::string Api::AddTextToNotificationResource(std::string msg)
 		//text->SetOutLineColor(outline_color);
 		//text->SetOutLineThickness(outline_thickness);
 		text->SetString(string);
-		tempNotificationPtr->GetBaseLayer()->AddObject(text, position);
+		if (tempNotificationPtr == nullptr)
+			errors = true;
+		else
+			tempNotificationPtr->GetBaseLayer()->AddObject(text, position);
 	}
 	if (!errors)
 		return "{\"return_status\":\"done\"}";
@@ -506,6 +581,32 @@ std::string Api::PopUpNotification(std::string msg)
 		return "{\"return_status\":\"done\"}";
 	else
 		return "{\"return_status\":\"failed\"}";
+}
+
+std::string Api::GetLoadedResources(std::string msg)
+{
+	auto resourceList = ResourceManager::GetInstance()->GetList();
+	std::string LoadedString = "";
+	bool first = true;
+	try
+	{
+		for (int i = 0; i < resourceList.size(); i++) {
+			auto list = resourceList[i]->GetList();
+			for (int j = 0; j < list.size(); j++) {
+				if (first)
+					LoadedString.append(resourceList[i]->GetName() + ":" + list[j]->GetName());
+				else
+					LoadedString.append("/" + resourceList[i]->GetName() + ":" + list[j]->GetName());
+				first = false;
+			}
+		}
+	}
+	catch (const std::exception & exc)
+	{
+		MessageBoxA(NULL, "Notification Daemon, Api::GetLoadedResources failed", exc.what(), MB_ICONERROR);
+	}
+
+	return "{\"return_status\":\"done\", \"loaded_resources\":\"" + LoadedString + "\"}";
 }
 
 std::string Api::CloseDaemon()

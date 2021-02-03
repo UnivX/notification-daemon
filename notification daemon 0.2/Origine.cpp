@@ -20,8 +20,19 @@
 #pragma comment (lib, "Mswsock.lib")
 /*
 TODO
--implent the variables on the notification class for more reusable notification blueprint
+-add more modificable variables to the rendering objects
+-add to api the possibility to get all loaded data
 -BIG FEATURE: make it for linux
+*/
+/*
+BUGS:
+after a while of new connection with the sockets the engine is fucked up
+*/
+/*
+NEW FEATURES ADDED:
+-reworked the GetMessages function
+-added the new api method GetLoadedResources
+-added support to unicode chars until U + FFFF (single 16-bit char, after it becomes two 16-bit chars)
 */
 void Init() {
 	//init the resource manager
@@ -42,6 +53,7 @@ void Init() {
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+	setlocale(LC_ALL, "en_US.utf16");
 	Init();
 	//set up rendering thread
 	RenderingThread renderingThread;

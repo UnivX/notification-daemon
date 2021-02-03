@@ -1,6 +1,8 @@
 #include "RenderingObject.h"
 #include "API.h"
-
+#include <stdexcept>
+#include <vector>
+#include <windows.h>
 RenderingObject::RenderingObject()
 {
 }
@@ -51,6 +53,27 @@ bool TextObject::ChangeValue(std::string value_name, std::string value)
 	if (value_name == "string") {
 		this->text.setString(value);
 	}
+	else if (value_name == "wstring") {
+
+		std::wstring wvalue = utf8toUtf16(value);
+		for (int i = 0; i < wvalue.size(); i++) {
+			if (wvalue[i] >= 0xD800 && wvalue[i] <= 0xDFFF) {//if the unicode(utf-32) > 0xFFFF,( if the unicode(utf-32) is > 0xFFFF the char is splitted in two utf-16 char in the range of the if)
+				wvalue.erase(wvalue.begin() + i);
+				i--;
+			}
+			
+			else if (wvalue[i] >= 0xE000 && wvalue[i] <= 0xFFFF) {//if the unicode(utf-32) > 0xFFFF,( if the unicode(utf-32) is > 0xFFFF the char is splitted in two utf-16 char in the range of the if)
+				wvalue.erase(wvalue.begin() + i);
+				i--;
+			}
+			
+			else if (wvalue[i] >= 0x2190 && wvalue[i] <= 0x27BF) {//if the unicode(utf-32) > 0xFFFF,( if the unicode(utf-32) is > 0xFFFF the char is splitted in two utf-16 char in the range of the if)
+				wvalue.erase(wvalue.begin() + i);
+				i--;
+			}
+		}
+		this->text.setString(wvalue);
+	}
 	return false;
 }
 
@@ -70,6 +93,11 @@ void TextObject::SetCharacterSize(unsigned int size)
 }
 
 void TextObject::SetString(std::string str)
+{
+	this->text.setString(str);
+}
+
+void TextObject::SetWString(std::wstring str)
 {
 	this->text.setString(str);
 }

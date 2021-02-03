@@ -37,6 +37,11 @@ ResourceManager* ResourceManager::GetInstance()
 	return ResourceManager::instance;
 }
 
+std::vector<ResourceList*> ResourceManager::GetList()
+{
+	return this->list;
+}
+
 std::string Resource::GetName()
 {
 	std::lock_guard<std::mutex> l(this->mutex);
@@ -85,4 +90,9 @@ void ResourceList::SetName(std::string name)
 {
 	std::lock_guard<std::mutex> l(this->nameMutex);
 	this->m_name = name;
+}
+
+std::vector<std::shared_ptr<Resource>> ResourceList::GetList()
+{
+	return this->resources;
 }

@@ -1,5 +1,5 @@
 #include "Animations.h"
-
+#define MULT 0.2f
 BaseAnimationFunction::BaseAnimationFunction() {
 	this->velocity = 0;
 	this->fase = true;
@@ -14,24 +14,25 @@ AnimationFunction* BaseAnimationFunction::CreateDynamicCopy() {
 
 void BaseAnimationFunction::Function(sf::Vector2f& position, bool& ended, float deltaTime) {
 	if (fase) {
-		velocity = ((position.x / 1.f) + 0.1);
+		velocity = ((position.x / MULT) + 0.1);
 		if (velocity > 25)
 			velocity = 25;
-		if (position.x >= 0) {
+		if (position.x > 0) {
 			position.x -= velocity * deltaTime * 30;
 		}
 		else
 		{
+			position.x = 0;
 			fase = false;
 		}
 	}
 	else
 	{
-		if (timer < 2) {
+		if (timer < 6) {
 			timer += deltaTime;
 		}
 		else {
-			velocity = ((position.x) + 0.1);
+			velocity = ((position.x / MULT) + 0.1);
 			if (velocity > 25)
 				velocity = 25;
 			if (position.x <= 400) {

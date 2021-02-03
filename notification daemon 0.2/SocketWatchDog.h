@@ -27,5 +27,6 @@ private:
 	std::shared_ptr<SocketThread> listeningSocket;
 	std::thread *m_thread;
 	std::atomic<bool> m_run;
+	int errors_counter;
 };
 

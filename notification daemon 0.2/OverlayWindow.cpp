@@ -6,7 +6,9 @@ OverlayWindow::OverlayWindow(sf::Vector2i pos, sf::Vector2i size, float alpha)
 {
 	this->pos = pos;
 	this->size = size;
-	this->window = new sf::RenderWindow(sf::VideoMode(size.x, size.y, 32), "Transparent Window", sf::Style::None);
+	sf::ContextSettings settings;
+	settings.antialiasingLevel = 16;
+	this->window = new sf::RenderWindow(sf::VideoMode(size.x, size.y, 32), "Transparent Window", sf::Style::None, settings);
 	this->hwnd = GetActiveWindow();  // Win32 API
 	//set transparency
 	SetWindowLongA(this->hwnd, GWL_EXSTYLE, GetWindowLong(this->hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_NOACTIVATE);
