@@ -90,7 +90,7 @@ print("reading the compilation_options.json file")
 (compiler_op, linker_op) = load_options_form_json_file(actual_dir + '/' + "compilation_options.json")
 
 #creating the compiler command
-compiler_command = "g++ -c "
+compiler_command = "g++ -g -c "
 #adding all the cpp files
 
 end_compiler_command = ""

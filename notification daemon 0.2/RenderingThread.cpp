@@ -85,15 +85,6 @@ void RenderingThread::Main()
 
 	text.setPosition(sf::Vector2f(0, 0));	
 	*/
-	sf::Font font;
-	font.loadFromFile("C:\\Users\\SIMONE\\Desktop\\Notification\\Candara.ttf");
-	auto text = new TextObject(&font);
-	text->SetCharacterSize(11);
-	text->SetFillColor(sf::Color::Black);
-	text->SetName("test");
-	//text->SetOutLineColor(outline_color);
-	//text->SetOutLineThickness(outline_thickness);
-	text->SetString("this is a test");
 	sf::Clock clock;
 	while (this->m_run) {
 		//notification queue things
