@@ -75,7 +75,11 @@ inline bool GetValueFromMessage(std::string message, std::string variable, T& va
 	}
 	catch (const std::exception & exc)
 	{
+		#ifndef SFML_SYSTEM_LINUX
 		MessageBoxA(NULL, "Notification Daemon, GetValueFromMessage failed", exc.what(), MB_ICONERROR);
+		#else
+		;
+		#endif
 	}
 }
 
@@ -105,6 +109,10 @@ inline bool GetValueFromMessage(std::string message, std::string variable, std::
 	}
 	catch (const std::exception & exc)
 	{
+		#ifndef SFML_SYSTEM_LINUX
 		MessageBoxA(NULL, "Notification Daemon, GetValueFromMessage<std::string> failed", exc.what(), MB_ICONERROR);
+		#else
+		;
+		#endif
 	}
 }

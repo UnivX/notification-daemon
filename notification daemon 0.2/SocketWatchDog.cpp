@@ -38,7 +38,11 @@ void SocketWatchDog::RegisterNewSocket(std::shared_ptr<SocketThread> newSocket)
 	}
 	catch (const std::exception& exc)
 	{
+		#ifndef SFML_SYSTEM_LINUX
 		MessageBoxA(NULL, "Notification Daemon, SocketWatchDog::RegisterNewSocket failed", exc.what(), MB_ICONERROR);
+		#else
+		;
+		#endif
 	}
 }
 
@@ -79,8 +83,10 @@ void SocketWatchDog::Main()
 						this->errors_counter = 0;
 
 					if (this->errors_counter > 1000) {
+						#ifndef SFML_SYSTEM_LINUX
 						MessageBoxA(NULL, ("dead loop of socket crashes " + std::to_string(WSAGetLastError())).c_str(), "ERROR", NULL);
 						throw std::exception("dead loop of socket crashes");
+						#endif
 						abort();
 					}
 
@@ -90,10 +96,18 @@ void SocketWatchDog::Main()
 		}
 		catch (const std::exception & exc)
 		{
+			#ifndef SFML_SYSTEM_LINUX
 			MessageBoxA(NULL, "Notification Daemon, SocketWatchDog::Main failed", exc.what(), MB_ICONERROR);
+			#else
+			;
+			#endif
 		}
 
 		this->socketPoolMutex.unlock();
+#ifndef SFML_SYSTEM_LINUX
 		Sleep(50);
+#else
+		sleep(50);
+#endif
 	}
 }

@@ -21,7 +21,11 @@ RawMessages GetMessages(SocketThread& thread)
 
 	do
 	{
+#ifndef SFML_SYSTEM_LINUX
 		ZeroMemory(recived, BLEN);
+#else
+		memset(recived, NULL, BLEN);
+#endif
 		bool recvReturn = thread.Recv(recived);
 		if (recvReturn) {
 			std::string data(recived);
@@ -102,7 +106,11 @@ void Api::ElaborateMessage(std::string msg, SocketThread& thread)
 	if (sendBuffer == nullptr) {
 		return;
 	}
+	#ifndef SFML_SYSTEM_LINUX
 	ZeroMemory(sendBuffer, thread.GetBufferLenght());
+	#else
+	memset(sendBuffer,NULL, thread.GetBufferLenght());
+	#endif
 
 	std::string response = "";
 	std::string code;
@@ -603,7 +611,11 @@ std::string Api::GetLoadedResources(std::string msg)
 	}
 	catch (const std::exception & exc)
 	{
+		#ifndef SFML_SYSTEM_LINUX
 		MessageBoxA(NULL, "Notification Daemon, Api::GetLoadedResources failed", exc.what(), MB_ICONERROR);
+		#else
+		;
+		#endif
 	}
 
 	return "{\"return_status\":\"done\", \"loaded_resources\":\"" + LoadedString + "\"}";
@@ -612,6 +624,10 @@ std::string Api::GetLoadedResources(std::string msg)
 std::string Api::CloseDaemon()
 {
 	auto r = this->renderingThread;
+#ifndef SFML_SYSTEM_LINUX
 	auto t = std::async(std::launch::async, [=] { Sleep(1000); r->CloseThread(); });//launch async so the socket can send the response
+#else
+	auto t = std::async(std::launch::async, [=] { sleep(1000); r->CloseThread(); });//launch async so the socket can send the response
+#endif
 	return "{\"return_status\":\"done\"}";
 }

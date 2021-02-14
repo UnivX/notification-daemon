@@ -2,6 +2,9 @@
 #include "FontResource.h"
 #include "ResourceManager.h"
 #include <memory>
+#ifdef SFML_SYSTEM_LINUX
+#include <unistd.h>
+#endif
 
 RenderingThread::RenderingThread()
 {
@@ -35,12 +38,20 @@ void RenderingThread::SetFramerate(int frameRate)
 
 void RenderingThread::HideWindow()
 {
+#ifndef SFML_SYSTEM_LINUX
 	::ShowWindow(this->window->getWindow()->getSystemHandle(), SW_HIDE);
+#else
+	this->window->getWindow()->setVisible(false);
+#endif
 }
 
 void RenderingThread::ShowWindow()
 {
+#ifndef SFML_SYSTEM_LINUX
 	::ShowWindow(this->window->getWindow()->getSystemHandle(), SW_SHOW);
+#else
+	this->window->getWindow()->setVisible(false);
+#endif
 }
 
 void RenderingThread::PlayNotification(Notification* notification)
@@ -143,7 +154,11 @@ void RenderingThread::Main()
 			window->display();
 		}
 		else
+#ifndef SFML_SYSTEM_LINUX
 			Sleep(40);
+#else
+			sleep(40);
+#endif
 		this->windowMutex.unlock();
 		//end of protected section
 	}

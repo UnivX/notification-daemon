@@ -1,0 +1,12 @@
+{
+    "compiler_options":{
+        "include_paths":[],
+        "standard":"c++11",
+        "optimization":"O3"
+    },
+    "linker_options":{
+        "library_paths":[],
+        "libs":["sfml-graphics", "sfml-window", "sfml-system", "X11", "pthread"],
+        "executable_name":"sfml-app"
+    }
+}

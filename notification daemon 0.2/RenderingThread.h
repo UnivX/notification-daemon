@@ -1,6 +1,12 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+
+#ifndef SFML_SYSTEM_LINUX
 #include <Windows.h>
+#else
+
+#endif
+
 #include <atomic>
 #include <functional>
 #include <future>
