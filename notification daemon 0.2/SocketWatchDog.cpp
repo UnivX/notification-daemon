@@ -76,8 +76,12 @@ void SocketWatchDog::Main()
 					if (this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_NO_ERROR
 						&& this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_ERROR_RECV_FAILED
 						&& this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_ERROR_SEND_FAILED)//if some error appened
+#ifndef SFML_SYSTEM_LINUX
 						MessageBoxA(NULL, ("a socket thread crashed" + std::to_string(WSAGetLastError())).c_str(), "ERROR", NULL);
-					this->socketPool.erase(this->socketPool.begin() + i);//erase from list
+#else
+                    ;
+#endif
+                    this->socketPool.erase(this->socketPool.begin() + i);//erase from list
 					i--;
 				}
 			}
