@@ -7,7 +7,7 @@ OverlayWindow::OverlayWindow(sf::Vector2i pos, sf::Vector2i size, float alpha)
 	this->pos = pos;
 	this->size = size;
 	sf::ContextSettings settings;
-	settings.antialiasingLevel = 16;
+	settings.antialiasingLevel = 2;
 	this->window = new sf::RenderWindow(sf::VideoMode(size.x, size.y, 32), "Transparent Window", sf::Style::None, settings);
 	this->hwnd = GetActiveWindow();  // Win32 API
 	//set transparency

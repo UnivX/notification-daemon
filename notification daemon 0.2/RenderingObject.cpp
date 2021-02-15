@@ -244,3 +244,119 @@ std::vector<std::pair<RenderingObject*, sf::Vector2f>>* Layer::GetVector()
 {
 	return &this->vector;
 }
+
+
+TextBoxObject::TextBoxObject(sf::Font* font)
+{
+	this->text.setFont(*font);
+	this->text.setStyle(sf::Text::Regular);
+}
+
+bool TextBoxObject::ChangeValue(std::string value_name, std::string value)
+{
+	if (value_name == "string") {
+		this->text.setString(value);
+	}
+	else if (value_name == "wstring") {
+
+		std::wstring wvalue = utf8toUtf16(value);
+		for (int i = 0; i < wvalue.size(); i++) {
+			if (wvalue[i] >= 0xD800 && wvalue[i] <= 0xDFFF) {//if the unicode(utf-32) > 0xFFFF,( if the unicode(utf-32) is > 0xFFFF the char is splitted in two utf-16 char in the range of the if)
+				wvalue.erase(wvalue.begin() + i);
+				i--;
+			}
+
+			else if (wvalue[i] >= 0xE000 && wvalue[i] <= 0xFFFF) {//if the unicode(utf-32) > 0xFFFF,( if the unicode(utf-32) is > 0xFFFF the char is splitted in two utf-16 char in the range of the if)
+				wvalue.erase(wvalue.begin() + i);
+				i--;
+			}
+
+			else if (wvalue[i] >= 0x2190 && wvalue[i] <= 0x27BF) {//if the unicode(utf-32) > 0xFFFF,( if the unicode(utf-32) is > 0xFFFF the char is splitted in two utf-16 char in the range of the if)
+				wvalue.erase(wvalue.begin() + i);
+				i--;
+			}
+		}
+		this->text.setString(wvalue);
+	}
+	return false;
+}
+
+sf::Drawable* TextBoxObject::GetDrawableObject()
+{
+	return &this->text;
+}
+
+sf::Transformable* TextBoxObject::GetTransformableObject()
+{
+	return &this->text;
+}
+
+void TextBoxObject::SetCharacterSize(unsigned int size)
+{
+	this->text.setCharacterSize(size);
+}
+
+void TextBoxObject::SetBoxSize(sf::Vector2f size)
+{
+	this->boxSize = size;
+}
+
+void TextBoxObject::SetString(std::string str)
+{
+	this->text.setString(str);
+	this->UpdateString();
+}
+
+void TextBoxObject::SetWString(std::wstring str)
+{
+	this->text.setString(str);
+	this->UpdateString();
+}
+
+void TextBoxObject::SetOutLineThickness(float thickness)
+{
+	this->text.setOutlineThickness(thickness);
+}
+
+void TextBoxObject::SetFillColor(sf::Color color)
+{
+	this->text.setFillColor(color);
+}
+
+void TextBoxObject::SetOutLineColor(sf::Color color)
+{
+	this->text.setOutlineColor(color);
+}
+
+void TextBoxObject::SetFont(sf::Font * font)
+{
+	this->text.setFont(*font);
+}
+
+void TextBoxObject::UpdateString()
+{
+	//algorithm for auto return the text
+	sf::String string = this->text.getString();
+	float position_x = 0;
+	float position_y = 0;
+	for (size_t i = 0; i < string.getSize(); i++) {
+		sf::Glyph glyph= this->text.getFont()->getGlyph(string[i], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold);
+		position_x += glyph.advance;
+		
+		if (position_x > this->boxSize.x) {
+			string.insert(i - 1, "-\n");
+			position_x = 0;
+			i -= 2;
+			position_y += glyph.bounds.height;
+			continue;
+		}
+
+		if (position_y + glyph.bounds.height > this->boxSize.y) {
+			string = string.substring(0, i - 4);
+			string += "...";
+			break;
+		}
+
+	}
+	this->text.setString(string);
+}

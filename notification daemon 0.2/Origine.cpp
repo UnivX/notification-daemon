@@ -19,7 +19,14 @@
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 /*
+NOW DOING:
+-creating the new rendering object TextBox
+for auto returning when the text goes out of the box
+*/
+/*
 TODO
+-test the textbox object
+-implement log system
 -add more modificable variables to the rendering objects
 -add to api the possibility to get all loaded data
 -BIG FEATURE: make it for linux
@@ -72,7 +79,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 		Api api(renderingThread);
 
-		while (thread.IsThreadRunning()) {
+		while (thread.IsThreadRunning() && thread.GetReturnCode() == 0) {
 			RawMessages messages = GetMessages(thread);
 			if (messages.errorsOnReciving){
 				returnCode = -1;

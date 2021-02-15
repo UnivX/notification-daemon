@@ -81,6 +81,27 @@ private:
 	sf::Text text;
 };
 
+class TextBoxObject : public RenderingObject {
+	TextBoxObject(sf::Font* font);
+	bool ChangeValue(std::string value_name, std::string value);
+	sf::Drawable* GetDrawableObject();
+	sf::Transformable* GetTransformableObject();
+	void SetCharacterSize(unsigned int size);
+	void SetBoxSize(sf::Vector2f size);
+	void SetString(std::string str);
+	void SetWString(std::wstring str);
+	void SetOutLineThickness(float thickness);
+	void SetFillColor(sf::Color color);
+	void SetOutLineColor(sf::Color color);
+	void SetFont(sf::Font* font);
+	RenderingObject* CreateDynamicCopy() { return new TextBoxObject(*this); };
+	ObjectType GetType() { return ObjectType::ObjText; };
+private:
+	void UpdateString();
+	sf::Vector2f boxSize;
+	sf::Text text;
+};
+
 /*
 Modificable values: none
 */
