@@ -1,5 +1,5 @@
 #include "Notification.h"
-
+#include <iostream>
 
 
 Notification::Notification()
@@ -41,7 +41,16 @@ void Notification::Update(float deltaTime)
 
 bool Notification::IsEnded()
 {
-	return this->ended;
+	bool cpy;
+	try
+	{
+		cpy = this->ended;
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << e.what() << '\n';
+	}
+	return cpy;
 }
 
 Notification* Notification::CreateDynamicCopy()

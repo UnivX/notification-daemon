@@ -1,7 +1,21 @@
 #pragma once
+#include <SFML/Graphics.hpp>
+
+#ifndef SFML_SYSTEM_LINUX
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <Windows.h>
+#else
+
+#include <unistd.h> 
+#include <stdio.h> 
+#include <sys/socket.h> 
+#include <stdlib.h> 
+#include <netinet/in.h> 
+#include <string.h>
+
+#endif
+
 #include <atomic>
 #include <functional>
 #include <future>
@@ -31,7 +45,11 @@ the class is not copiable
 class SocketThread
 {
 public:
+#ifndef SFML_SYSTEM_LINUX
 	SocketThread(PCSTR port, int bufferLenght, std::function<void(std::atomic<int>& returnCode, std::atomic<int>& connectionStatus, SocketThread& thread)> internFunction);
+#else
+	SocketThread(int port, int bufferLenght, std::function<void(std::atomic<int>& returnCode, std::atomic<int>& connectionStatus, SocketThread& thread)> internFunction);
+#endif
 	~SocketThread();
 	int GetReturnCode();
 	int GetSocketConnectionStatus();
@@ -43,11 +61,17 @@ public:
 private:
 	void MainLoop();
 	void Connect();
+#ifndef SFML_SYSTEM_LINUX
 	PCSTR port;
+#endif
 	std::future<void> m_future;
 	std::atomic<int> returnCode, connectionStatus;
 	std::function<void(std::atomic<int>& returnCode, std::atomic<int>& connectionStatus, SocketThread& thread)> internFunction;
+#ifndef SFML_SYSTEM_LINUX
 	SOCKET listeningSocket, clientSocket;
+#else
+	int sockfd, newsockfd, port;
+#endif
 	int bufferLenght;
 };
 

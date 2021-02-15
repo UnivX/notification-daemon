@@ -2,6 +2,10 @@
 #include "FontResource.h"
 #include "ResourceManager.h"
 #include <memory>
+#ifdef SFML_SYSTEM_LINUX
+#include <unistd.h>
+#endif
+#include <iostream>
 
 RenderingThread::RenderingThread()
 {
@@ -9,6 +13,7 @@ RenderingThread::RenderingThread()
 	this->m_run = true;
 	this->window = new OverlayWindow(sf::Vector2i(1920 - 400, 1080 - 140), sf::Vector2i(400, 100));
 	this->HideWindow();
+	this->runningNotification =nullptr;
 }
 
 
@@ -35,12 +40,20 @@ void RenderingThread::SetFramerate(int frameRate)
 
 void RenderingThread::HideWindow()
 {
+#ifndef SFML_SYSTEM_LINUX
 	::ShowWindow(this->window->getWindow()->getSystemHandle(), SW_HIDE);
+#else
+	this->window->getWindow()->setVisible(false);
+#endif
 }
 
 void RenderingThread::ShowWindow()
 {
+#ifndef SFML_SYSTEM_LINUX
 	::ShowWindow(this->window->getWindow()->getSystemHandle(), SW_SHOW);
+#else
+	this->window->getWindow()->setVisible(false);
+#endif
 }
 
 void RenderingThread::PlayNotification(Notification* notification)
@@ -74,15 +87,6 @@ void RenderingThread::Main()
 
 	text.setPosition(sf::Vector2f(0, 0));	
 	*/
-	sf::Font font;
-	font.loadFromFile("C:\\Users\\SIMONE\\Desktop\\Notification\\Candara.ttf");
-	auto text = new TextObject(&font);
-	text->SetCharacterSize(11);
-	text->SetFillColor(sf::Color::Black);
-	text->SetName("test");
-	//text->SetOutLineColor(outline_color);
-	//text->SetOutLineThickness(outline_thickness);
-	text->SetString("this is a test");
 	sf::Clock clock;
 	while (this->m_run) {
 		//notification queue things
@@ -109,6 +113,8 @@ void RenderingThread::Main()
 		//update notification
 		this->notificationQueueMutex.lock();
 		//if notification ended delete the notification and set the pointer null
+		if(this->runningNotification != nullptr)
+			std::cout << runningNotification << std::endl;
 		if (this->runningNotification != nullptr && this->runningNotification->IsEnded()) {
 			delete this->runningNotification;
 			this->runningNotification = nullptr;
@@ -143,7 +149,11 @@ void RenderingThread::Main()
 			window->display();
 		}
 		else
+#ifndef SFML_SYSTEM_LINUX
 			Sleep(40);
+#else
+			sleep(40);
+#endif
 		this->windowMutex.unlock();
 		//end of protected section
 	}

@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include "SocketThread.h"
 #include <thread>
 #include <vector>

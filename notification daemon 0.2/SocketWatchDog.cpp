@@ -36,7 +36,11 @@ void SocketWatchDog::RegisterNewSocket(std::shared_ptr<SocketThread> newSocket)
 	}
 	catch (const std::exception& exc)
 	{
+		#ifndef SFML_SYSTEM_LINUX
 		MessageBoxA(NULL, "Notification Daemon, SocketWatchDog::RegisterNewSocket failed", exc.what(), MB_ICONERROR);
+		#else
+		;
+		#endif
 	}
 }
 
@@ -73,7 +77,6 @@ void SocketWatchDog::Main()
 						&& this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_ERROR_RECV_FAILED
 						&& this->socketPool[i]->GetReturnCode() != SOCKET_THREAD_ERROR_SEND_FAILED)//if some error appened
 						MessageBoxA(NULL, ("a socket thread crashed" + std::to_string(WSAGetLastError())).c_str(), "ERROR", NULL);
-
 					this->socketPool.erase(this->socketPool.begin() + i);//erase from list
 					i--;
 				}
@@ -81,10 +84,18 @@ void SocketWatchDog::Main()
 		}
 		catch (const std::exception & exc)
 		{
+			#ifndef SFML_SYSTEM_LINUX
 			MessageBoxA(NULL, "Notification Daemon, SocketWatchDog::Main failed", exc.what(), MB_ICONERROR);
+			#else
+			;
+			#endif
 		}
 
 		this->socketPoolMutex.unlock();
+#ifndef SFML_SYSTEM_LINUX
 		Sleep(50);
+#else
+		sleep(50);
+#endif
 	}
 }

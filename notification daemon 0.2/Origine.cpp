@@ -1,12 +1,16 @@
-#pragma once
+#include <SFML/Graphics.hpp>
 #define BLEN 512
 #define PORT "27015"
+#ifndef SFML_SYSTEM_LINUX
 
 #define WIN32_LEAN_AND_MEAN
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <SFML/Graphics.hpp>
+#endif
+
+#ifndef SFML_SYSTEM_LINUX
 #include <windows.h>
+#endif
 #include "OverlayWindow.h"
 #include <iostream>
 #include "SocketWatchDog.h"
@@ -14,10 +18,16 @@
 #include <algorithm>
 #include <memory>
 #include "API.h"
+#ifdef SFML_SYSTEM_LINUX
+#include <unistd.h>
+#endif
 
+
+#ifndef SFML_SYSTEM_LINUX
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
+#endif
 /*
 NOW DOING:
 -creating the new rendering object TextBox
@@ -41,6 +51,7 @@ NEW FEATURES ADDED:
 -added the new api method GetLoadedResources
 -added support to unicode chars until U + FFFF (single 16-bit char, after it becomes two 16-bit chars)
 */
+
 void Init() {
 	//init the resource manager
 	auto resourceManagerInstance = ResourceManager::GetInstance();
@@ -48,7 +59,7 @@ void Init() {
 	resourceManagerInstance->AddNewList("Textures");// set up texture list
 	resourceManagerInstance->AddNewList("NotificationBluePrints");// set up texture list
 
-
+#ifndef SFML_SYSTEM_LINUX
 	// Initialize Winsock
 	WSADATA wsaData;
 	int iResult;
@@ -56,9 +67,13 @@ void Init() {
 	if (iResult != 0) {
 		printf("WSAStartup failed with error: %d\n", iResult);
 	}
+#endif
 }
-
+#ifndef SFML_SYSTEM_LINUX
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+#else
+int main()
+#endif
 {
 	setlocale(LC_ALL, "en_US.utf16");
 	Init();
@@ -89,8 +104,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 			//elaborate all the messages
 			for(std::string msg : messages.messages)
 				api.ElaborateMessage(msg, thread);
-			
+			#ifndef SFML_SYSTEM_LINUX
 			Sleep(1);
+			#else
+			sleep(1);
+			#endif
 		}
 		std::cout << "socket closed\n";
 	};
@@ -109,6 +127,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	SocketWatchDog::GetInstance()->RegisterNewSocket(st);
 
 	renderingThread.Main();
+#ifndef SFML_SYSTEM_LINUX
 	WSACleanup();
+#endif
 	return 0;
 }
