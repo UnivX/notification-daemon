@@ -64,6 +64,7 @@ bool SocketThread::Send(const char* buffer)
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
 		return false;
 	}
+	return true;
 }
 #endif
 
@@ -109,6 +110,7 @@ bool SocketThread::IsThreadRunning()
 {
 	if(this->m_future.valid())
 		return this->m_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready;//return if the return is avaible(if the return of the function is avaible the thread has stopped
+	return false;
 }
 
 #ifndef SFML_SYSTEM_LINUX

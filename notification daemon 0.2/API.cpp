@@ -24,7 +24,7 @@ RawMessages GetMessages(SocketThread& thread)
 #ifndef SFML_SYSTEM_LINUX
 		ZeroMemory(recived, BLEN);
 #else
-		memset(recived, NULL, BLEN);
+		memset(recived, 0x00000000, BLEN);
 #endif
 		bool recvReturn = thread.Recv(recived);
 		if (recvReturn) {
@@ -109,7 +109,7 @@ void Api::ElaborateMessage(std::string msg, SocketThread& thread)
 	#ifndef SFML_SYSTEM_LINUX
 	ZeroMemory(sendBuffer, thread.GetBufferLenght());
 	#else
-	memset(sendBuffer,NULL, thread.GetBufferLenght());
+	memset(sendBuffer,0x00000000, thread.GetBufferLenght());
 	#endif
 
 	std::string response = "";

@@ -4,6 +4,7 @@ from os.path import isfile, join
 import json
 import subprocess
 import sys
+from threading import Thread
 
 def exec_command(cmd):
     cut = subprocess.Popen(cmd,
@@ -75,6 +76,15 @@ def load_options_form_json_file(file):
     linker_op.executable_name = data["linker_options"]["executable_name"]
     return (compiler_op, linker_op)
 
+
+class CompilerThread (Thread):
+    def __init__(self, command):
+        Thread.__init__(self)
+        self.command = command
+    def run(self):
+        exec_command(self.command)
+
+
 actual_dir = os.getcwd()
 print("finding files in " + actual_dir +" with .cpp extension\nfiles:")
 cpp_files = filter_string_if_contains(get_all_files_in_dir_root(actual_dir), [".cpp"])
@@ -130,10 +140,16 @@ print(linker_command)
 
 print("\nexecuting the compilation and linker command\n")
 
+thread_pool = []
+
 for file in cpp_files:
     final_command = compiler_command + file.replace(" ", "\\ ") + end_compiler_command + " -o obj/" + file.split("/")[-1][:-3]+"o"
-    exec_command(final_command)
+    thread_pool.append(CompilerThread(final_command))
+    thread_pool[-1].start()
     print("command: " + final_command)
+
+for thread in thread_pool:
+    thread.join()
 
 exec_command(linker_command)
 

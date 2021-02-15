@@ -5,6 +5,7 @@
 #ifdef SFML_SYSTEM_LINUX
 #include <unistd.h>
 #endif
+#include <iostream>
 
 RenderingThread::RenderingThread()
 {
@@ -12,6 +13,7 @@ RenderingThread::RenderingThread()
 	this->m_run = true;
 	this->window = new OverlayWindow(sf::Vector2i(1920 - 400, 1080 - 140), sf::Vector2i(400, 100));
 	this->HideWindow();
+	this->runningNotification =nullptr;
 }
 
 
@@ -111,6 +113,8 @@ void RenderingThread::Main()
 		//update notification
 		this->notificationQueueMutex.lock();
 		//if notification ended delete the notification and set the pointer null
+		if(this->runningNotification != nullptr)
+			std::cout << runningNotification << std::endl;
 		if (this->runningNotification != nullptr && this->runningNotification->IsEnded()) {
 			delete this->runningNotification;
 			this->runningNotification = nullptr;
