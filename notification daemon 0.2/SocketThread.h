@@ -61,6 +61,7 @@ public:
 private:
 	void MainLoop();
 	void Connect();
+	void Debug(int n);
 #ifndef SFML_SYSTEM_LINUX
 	PCSTR port;
 #endif

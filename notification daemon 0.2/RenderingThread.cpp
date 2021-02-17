@@ -43,7 +43,7 @@ void RenderingThread::HideWindow()
 #ifndef SFML_SYSTEM_LINUX
 	::ShowWindow(this->window->getWindow()->getSystemHandle(), SW_HIDE);
 #else
-	this->window->getWindow()->setVisible(false);
+	//this->window->getWindow()->setVisible(false);
 #endif
 }
 
@@ -52,7 +52,7 @@ void RenderingThread::ShowWindow()
 #ifndef SFML_SYSTEM_LINUX
 	::ShowWindow(this->window->getWindow()->getSystemHandle(), SW_SHOW);
 #else
-	this->window->getWindow()->setVisible(false);
+	//this->window->getWindow()->setVisible(true);
 #endif
 }
 
@@ -113,8 +113,6 @@ void RenderingThread::Main()
 		//update notification
 		this->notificationQueueMutex.lock();
 		//if notification ended delete the notification and set the pointer null
-		if(this->runningNotification != nullptr)
-			std::cout << runningNotification << std::endl;
 		if (this->runningNotification != nullptr && this->runningNotification->IsEnded()) {
 			delete this->runningNotification;
 			this->runningNotification = nullptr;
@@ -152,7 +150,7 @@ void RenderingThread::Main()
 #ifndef SFML_SYSTEM_LINUX
 			Sleep(40);
 #else
-			sleep(40);
+			usleep(40);
 #endif
 		this->windowMutex.unlock();
 		//end of protected section

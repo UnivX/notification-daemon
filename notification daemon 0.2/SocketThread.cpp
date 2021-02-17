@@ -1,5 +1,5 @@
 #include "SocketThread.h"
-
+#include <iostream>
 
 #ifndef SFML_SYSTEM_LINUX
 SocketThread::SocketThread(PCSTR port, int bufferLenght, std::function<void(std::atomic<int>& returnCode, std::atomic<int>& connectionStatus, SocketThread& thread)> internFunction)
@@ -16,7 +16,6 @@ SocketThread::SocketThread(int port, int bufferLenght, std::function<void(std::a
 	this->port = port;
 	this->bufferLenght = bufferLenght;
 	this->internFunction = internFunction;
-
 }
 
 #endif
@@ -54,12 +53,15 @@ bool SocketThread::Send(const char* buffer)
 #else
 bool SocketThread::Send(const char* buffer)
 {
+	std::cout << "sending: " << buffer << std::endl;
 	if(this->newsockfd == 0){
+		std::cout << "error: socket closed" << std::endl; 
 		this->returnCode = SOCKET_THREAD_ERROR_SEND_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
 		return false;
 	}
 	if(send(this->newsockfd, buffer, this->bufferLenght, 0) == -1){
+		perror("error: on send");
 		this->returnCode = SOCKET_THREAD_ERROR_SEND_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
 		return false;
@@ -85,12 +87,14 @@ bool SocketThread::Recv(char* buffer)
 bool SocketThread::Recv(char* buffer)
 {
 	if(this->newsockfd == 0){
+		std::cout << "error: socket closed" << std::endl; 
 		this->returnCode = SOCKET_THREAD_ERROR_RECV_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
 		return false;
 	}
-	int iResult = read(newsockfd,buffer,255);
-	if (iResult < 0) {
+	int iResult = recv(newsockfd,buffer,this->bufferLenght, 0);
+	if (iResult <= 0) {
+		perror("error: on recv");
 		this->returnCode = SOCKET_THREAD_ERROR_RECV_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
 		return false;
@@ -144,9 +148,10 @@ void SocketThread::MainLoop()
 	this->Connect();
 	if (this->returnCode != SOCKET_THREAD_NO_ERROR || this->connectionStatus != SOCKET_STATUS_CONNECTED)//if not connected or some error occured terminate thread
 		return;
-
+	this->Debug(1);
 	this->internFunction(this->returnCode, this->connectionStatus, *this);
 	// cleanup
+	this->Debug(2);
 	this->connectionStatus = SOCKET_STATUS_CLOSED;
 	this->newsockfd = 0;
 }
@@ -224,37 +229,61 @@ void SocketThread::Connect()
     // socket(int domain, int type, int protocol)
     sockfd =  socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
+		perror("failed creating socket");
+		close(sockfd);
     	this->returnCode = SOCKET_THREAD_ERROR_SOCKET_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
 		return;
 	}
 
+	int tr=1;
+
+	// kill "Address already in use" error message
+	if (setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&tr,sizeof(int)) == -1) {
+		perror("setsockopt");
+		exit(1);
+}
+
     // clear address structure
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;  
-    serv_addr.sin_addr.s_addr = INADDR_ANY;  
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(this->port);
-
 
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
 		this->returnCode = SOCKET_THREAD_ERROR_BIND_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
+		close(sockfd);
 		this->sockfd = 0;
+		perror("bind");
 		return;
 	}
-			  
-    if(listen(sockfd,5) < 0){
+	
+
+	if(listen(sockfd,5) < 0){
 		this->returnCode = SOCKET_THREAD_ERROR_LISTEN_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
+		close(sockfd);
 		this->sockfd = 0;
+		perror("listen");
 		return;
 	}
+
+
     clilen = sizeof(cli_addr);
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0){
 		this->returnCode = SOCKET_THREAD_ERROR_ACCEPT_FAILED;
 		this->connectionStatus = SOCKET_STATUS_CLOSED;
+		close(sockfd);
+		close(newsockfd);
+		perror("accept");
 		return;
 	}
+	close(sockfd);
+	this->connectionStatus = SOCKET_STATUS_CONNECTED;
+	
 }
 #endif
+
+void SocketThread::Debug(int n){ return; }

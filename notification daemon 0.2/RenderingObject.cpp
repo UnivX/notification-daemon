@@ -349,17 +349,26 @@ void TextBoxObject::UpdateString()
 	float position_y = 0;
 	for (size_t i = 0; i < string.getSize(); i++) {
 		sf::Glyph glyph= this->text.getFont()->getGlyph(string[i], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold);
-		position_x += glyph.advance;
+		
+		if(string[i] == '\n'){
+			position_x = 0;
+			position_y += position_y += glyph.bounds.height + this->text.getLineSpacing();
+		}
+
+		else if(string[i] == ' ')
+			position_x += this->text.getLetterSpacing();
+		
+		else
+			position_x += glyph.advance;
 		
 		if (position_x > this->boxSize.x) {
 			string.insert(i - 1, "-\n");
 			position_x = 0;
 			i -= 2;
-			position_y += glyph.bounds.height;
 			continue;
 		}
 
-		if (position_y + glyph.bounds.height > this->boxSize.y) {
+		if (position_y + glyph.bounds.height + this->text.getLineSpacing()> this->boxSize.y) {
 			string = string.substring(0, i - 4);
 			string += "...";
 			break;

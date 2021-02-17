@@ -29,6 +29,7 @@ private:
 	std::string AddCircleToNotificationResource(std::string msg);
 	std::string AddSpriteToNotificationResource(std::string msg);
 	std::string AddTextToNotificationResource(std::string msg);
+	std::string AddTextBoxToNotificationResource(std::string msg);// TODO
 
 	std::string PopUpNotification(std::string msg);
 	std::string GetLoadedResources(std::string msg);

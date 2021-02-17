@@ -139,6 +139,9 @@ void Api::ElaborateMessage(std::string msg, SocketThread& thread)
 	else if (code == "add_text_to_notification_resource")
 		response = this->AddTextToNotificationResource(msg);
 
+	else if (code == "add_text_box_to_notification_resource")
+		response = "{\"return_status\":\"failed\", \"error\":\"TODO method called\"}";//TODO
+
 	else if (code == "end_notification_resource_creation")
 		response = this->EndNotificationResourceCreation(msg);
 
@@ -336,6 +339,95 @@ std::string Api::AddRectangleToNotificationResource(std::string msg)
 	else
 		return "{\"return_status\":\"failed\"}";
 }
+
+//TODO: check if is valid, and check if there are any errors or bugs
+std::string Api::AddTextBoxToNotificationResource(std::string msg)
+{
+	bool errors = false;
+	
+	sf::Vector2f size;
+	if (!GetValueFromMessage(msg, "size.x", size.x))
+		errors = true;
+	if (!GetValueFromMessage(msg, "size.y", size.y))
+		errors = true;
+
+	sf::Vector2f position;
+	if (!GetValueFromMessage(msg, "position.x", position.x))
+		errors = true;
+	if (!GetValueFromMessage(msg, "position.y", position.y))
+		errors = true;
+
+	float character_size;
+	if (!GetValueFromMessage(msg, "character_size", character_size))
+		errors = true;
+
+	sf::Color fill_color;
+	unsigned int rgb = 0;
+	if (!GetValueFromMessage(msg, "fill_color.r", rgb))
+		errors = true;
+	fill_color.r = rgb;
+	if (!GetValueFromMessage(msg, "fill_color.g", rgb))
+		errors = true;
+	fill_color.g = rgb;
+	if (!GetValueFromMessage(msg, "fill_color.b", rgb))
+		errors = true;
+	fill_color.b = rgb;
+
+	sf::Color outline_color;
+	if (!GetValueFromMessage(msg, "outline_color.r", rgb))
+		errors = true;
+	outline_color.r = rgb;
+	if (!GetValueFromMessage(msg, "outline_color.g", rgb))
+		errors = true;
+	outline_color.g = rgb;
+	if (!GetValueFromMessage(msg, "outline_color.b", rgb))
+		errors = true;
+	outline_color.b = rgb;
+
+	float outline_thickness;
+	if (!GetValueFromMessage(msg, "outline_thickness", outline_thickness))
+		errors = true;
+
+	std::string name;
+	if (!GetValueFromMessage(msg, "name", name))
+		errors = true;
+
+	std::string string;
+	if (!GetValueFromMessage(msg, "string", string))
+		errors = true;
+
+	std::string font_name;
+	if (!GetValueFromMessage(msg, "font_name", font_name))
+		errors = true;
+
+	auto resourcePtr = std::static_pointer_cast<FontResource>(resourceManagerInstance->GetListByName("Fonts")->SearchResource(font_name));
+	if (resourcePtr == nullptr)
+		errors = true;
+	else {
+		sf::Font* font = resourcePtr->GetFont();
+		if (font == nullptr) {
+			errors = true;
+			return "{\"return_status\":\"failed\"}";
+		}
+		auto text = new TextBoxObject(font);
+		text->SetCharacterSize(character_size);
+		text->SetFillColor(fill_color);
+		text->SetName(name);
+		text->SetBoxSize(size);
+		//text->SetOutLineColor(outline_color);
+		//text->SetOutLineThickness(outline_thickness);
+		text->SetString(string);
+		if (tempNotificationPtr == nullptr)
+			errors = true;
+		else
+			tempNotificationPtr->GetBaseLayer()->AddObject(text, position);
+	}
+	if (!errors)
+		return "{\"return_status\":\"done\"}";
+	else
+		return "{\"return_status\":\"failed\"}";
+}
+
 
 std::string Api::AddCircleToNotificationResource(std::string msg)
 {
@@ -625,9 +717,9 @@ std::string Api::CloseDaemon()
 {
 	auto r = this->renderingThread;
 #ifndef SFML_SYSTEM_LINUX
-	auto t = std::async(std::launch::async, [=] { Sleep(1000); r->CloseThread(); });//launch async so the socket can send the response
+	auto t = std::async(std::launch::async, [=] { usleep(1000); r->CloseThread(); });//launch async so the socket can send the response
 #else
-	auto t = std::async(std::launch::async, [=] { sleep(1000); r->CloseThread(); });//launch async so the socket can send the response
+	auto t = std::async(std::launch::async, [=] { usleep(1000); r->CloseThread(); });//launch async so the socket can send the response
 #endif
 	return "{\"return_status\":\"done\"}";
 }

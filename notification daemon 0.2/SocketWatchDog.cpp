@@ -1,5 +1,6 @@
 #include "SocketWatchDog.h"
 #include <sstream>
+#include <iostream>
 SocketWatchDog* SocketWatchDog::instance = nullptr;
 
 SocketWatchDog::SocketWatchDog()
@@ -28,7 +29,6 @@ void SocketWatchDog::RegisterNewSocket(std::shared_ptr<SocketThread> newSocket)
 {
 	try
 	{
-		//misterius bug here
 		this->socketPoolMutex.lock();
 		this->socketPool.emplace_back(newSocket);
 		this->listeningSocket = newSocket;
@@ -79,7 +79,7 @@ void SocketWatchDog::Main()
 #ifndef SFML_SYSTEM_LINUX
 						MessageBoxA(NULL, ("a socket thread crashed" + std::to_string(WSAGetLastError())).c_str(), "ERROR", NULL);
 #else
-                    ;
+                    std::cout << "ERROR: a socket crashed with code: " << this->socketPool[i]->GetReturnCode() << std::endl;
 #endif
                     this->socketPool.erase(this->socketPool.begin() + i);//erase from list
 					i--;
@@ -91,7 +91,7 @@ void SocketWatchDog::Main()
 			#ifndef SFML_SYSTEM_LINUX
 			MessageBoxA(NULL, "Notification Daemon, SocketWatchDog::Main failed", exc.what(), MB_ICONERROR);
 			#else
-			;
+			std::cout << "Notification Daemon, SocketWatchDog::Main failed: " << exc.what() << std::endl;
 			#endif
 		}
 
@@ -99,7 +99,7 @@ void SocketWatchDog::Main()
 #ifndef SFML_SYSTEM_LINUX
 		Sleep(50);
 #else
-		sleep(50);
+		usleep(50);
 #endif
 	}
 }

@@ -11,6 +11,7 @@ enum ObjectType
 	ObjText,
 	ObjRectangle,
 	ObjCircle,
+	ObjTextBox,
 };
 
 class RenderingObject {
@@ -82,6 +83,7 @@ private:
 };
 
 class TextBoxObject : public RenderingObject {
+public:
 	TextBoxObject(sf::Font* font);
 	bool ChangeValue(std::string value_name, std::string value);
 	sf::Drawable* GetDrawableObject();

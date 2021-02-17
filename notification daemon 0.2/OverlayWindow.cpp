@@ -6,19 +6,19 @@ bool setTransparency(Window wnd, unsigned char alpha)
     Display* display = XOpenDisplay(NULL);
     unsigned long opacity = (0xffffffff / 0xff) * alpha;
     Atom property = XInternAtom(display, "_NET_WM_WINDOW_OPACITY", false);
-        if (property != None)
-        {
-            XChangeProperty(display, wnd, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&opacity, 1);
-            XFlush(display);
-            XCloseDisplay(display);
-            return true;
-        }
-        else
-        {
-            XCloseDisplay(display);
-            return false;
-        }
+    if (property != None)
+    {
+        XChangeProperty(display, wnd, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char*)&opacity, 1);
+        XFlush(display);
+        XCloseDisplay(display);
+        return true;
     }
+    else
+    {
+        XCloseDisplay(display);
+        return false;
+    }
+}
 #endif
 
 OverlayWindow::OverlayWindow(sf::Vector2i pos, sf::Vector2i size, float alpha)
@@ -35,6 +35,11 @@ OverlayWindow::OverlayWindow(sf::Vector2i pos, sf::Vector2i size, float alpha)
 	SetLayeredWindowAttributes(this->hwnd, RGB(0, 0, 0), alpha, LWA_ALPHA | LWA_COLORKEY);
 #else
 	setTransparency(this->window->getSystemHandle(), alpha);
+	Display* display = XOpenDisplay(NULL);
+	XSetWindowAttributes attributes;
+    attributes.background_pixmap = ParentRelative;
+	XChangeWindowAttributes(display, this->window->getSystemHandle(), CWBackPixmap, &attributes);
+	XCloseDisplay(display);
 #endif
 }
 
@@ -57,9 +62,7 @@ void OverlayWindow::display()
 #ifndef SFML_SYSTEM_LINUX
 	SetWindowPos(this->hwnd, HWND_TOPMOST, this->pos.x, this->pos.y, this->size.x, this->size.y, SWP_NOACTIVATE);
 #else
-	Display* display = XOpenDisplay(NULL);
-    XCloseDisplay(display);
-	XRaiseWindow(display, this->window->getSystemHandle());
+	;
 #endif
 	this->window->display();
 }

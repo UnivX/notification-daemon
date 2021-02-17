@@ -1,6 +1,10 @@
 #include <SFML/Graphics.hpp>
 #define BLEN 512
+#ifndef SFML_SYSTEM_LINUX
 #define PORT "27015"
+#else
+#define PORT 27015
+#endif
 #ifndef SFML_SYSTEM_LINUX
 
 #define WIN32_LEAN_AND_MEAN
@@ -107,7 +111,7 @@ int main()
 			#ifndef SFML_SYSTEM_LINUX
 			Sleep(1);
 			#else
-			sleep(1);
+			usleep(1);
 			#endif
 		}
 		std::cout << "socket closed\n";

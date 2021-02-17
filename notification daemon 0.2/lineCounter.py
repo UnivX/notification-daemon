@@ -32,4 +32,4 @@ def countlines(start, lines=0, header=True, begin_start=None):
 
 
 if __name__ == '__main__':
-	countlines(r'C:\Users\SIMONE\source\repos\notification daemon 0.2\notification daemon 0.2')
+	countlines(os.getcwd())
