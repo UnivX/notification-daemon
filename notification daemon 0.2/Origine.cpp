@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#define BLEN 512
+#define BLEN 4096
 #ifndef SFML_SYSTEM_LINUX
 #define PORT "27015"
 #else

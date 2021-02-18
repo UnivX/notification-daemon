@@ -344,42 +344,41 @@ void TextBoxObject::SetFont(sf::Font * font)
 
 void TextBoxObject::UpdateString()
 {
-	//actualy brokern in linux
 	//algorithm for auto return the text
 	sf::String string = this->text.getString();
 	float position_x = 0;
 	float position_y = 0;
-	std::cout << "fuck-init " << string.getSize() << "\n";
+	if(string.getSize() < 4)
+		return;
+
 	for (size_t i = 0; i < string.getSize(); i++) {
-		std::cout << "fuck-inizio " << i << "text: "<< string[i] << std::endl;
 		sf::Glyph glyph;
+		glyph= this->text.getFont()->getGlyph(string[i], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold);
+		
 
 		if(string[i] == '\n'){
 			position_x = 0;
-			position_y += position_y += glyph.bounds.height + this->text.getLineSpacing();
+			position_y += glyph.bounds.height + this->text.getFont()->getLineSpacing(this->text.getCharacterSize());
 		}
+		else if(i != string.getSize()-1)
+			position_x += text.findCharacterPos(i+1).x - text.findCharacterPos(i).x;
+		else
+			position_x += text.findCharacterPos(1).x - text.findCharacterPos(0).x - this->text.getFont()->getGlyph(string[0], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold).bounds.width;
 
-		else if(string[i] == ' ')
-			position_x += this->text.getLetterSpacing();
-		
-		else{
-			glyph= this->text.getFont()->getGlyph(string[i], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold);
-			position_x += glyph.advance;
-		}
-		
 		if (position_x > this->boxSize.x) {
 			string.insert(i - 1, "-\n");
+			this->text.setString(string);
 			position_x = 0;
 			i -= 2;
 			continue;
 		}
 
-		if (position_y + glyph.bounds.height + this->text.getLineSpacing()> this->boxSize.y) {
+		if (position_y + glyph.bounds.height + this->text.getFont()->getLineSpacing(this->text.getCharacterSize())> this->boxSize.y) {
 			string = string.substring(0, i - 4);
 			string += "...";
+			this->text.setString(string);
 			break;
 		}
-		std::cout << "fuck-fine " << i << std::endl;
 	}
 	this->text.setString(string);
 }
