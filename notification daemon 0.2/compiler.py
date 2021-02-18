@@ -1,10 +1,13 @@
 import os
 from os import listdir
 from os.path import isfile, join
+import os.path
+from os import path
 import json
 import subprocess
 import sys
 from threading import Thread
+import hashlib
 
 def exec_command(cmd):
     cut = subprocess.Popen(cmd,
@@ -76,6 +79,33 @@ def load_options_form_json_file(file):
     linker_op.executable_name = data["linker_options"]["executable_name"]
     return (compiler_op, linker_op)
 
+def compare_file_hashes(raw_file, hash_file):
+    if path.exists(raw_file) and path.exists(hash_file):
+        #get old hash from the hash file
+        opened_hash_file = open(hash_file, "r")
+        old_hash = opened_hash_file.read()
+
+        #generate the new hash file from the raw file
+        opened_raw_file = open(raw_file, "r")
+        read_raw_file = opened_raw_file.read().encode()
+
+        sha1_raw_file_hash = hashlib.sha1(read_raw_file)
+        new_hash = sha1_raw_file_hash.hexdigest()
+
+        return str(old_hash) == str(new_hash)
+
+def update_hash_file(raw_file, hash_file):
+    #generate the new hash file from the raw file
+    opened_raw_file = open(raw_file, "r")
+    read_raw_file = opened_raw_file.read().encode()
+
+    sha1_raw_file_hash = hashlib.sha1(read_raw_file)
+    new_hash = sha1_raw_file_hash.hexdigest()
+
+    opened_hash_file = open(hash_file, "w")
+    opened_hash_file.write(new_hash)
+    opened_raw_file.close()
+    opened_hash_file.close()
 
 class CompilerThread (Thread):
     def __init__(self, command):
@@ -84,19 +114,25 @@ class CompilerThread (Thread):
     def run(self):
         exec_command(self.command)
 
+if not path.exists("obj"):
+    os.system("mkdir obj")
+
+if not path.exists("obj/hashes"):
+    os.system("mkdir obj/hashes")
 
 actual_dir = os.getcwd()
-print("finding files in " + actual_dir +" with .cpp extension\nfiles:")
+print("finding files in this directory and subdirectories with .cpp extension\nfiles:")
+
 cpp_files = filter_string_if_contains(get_all_files_in_dir_root(actual_dir), [".cpp"])
 if cpp_files != None:
     for file in cpp_files:
-        print(file)
+        print(file.split("/")[-1])
     print("total files: " + str(len(cpp_files)))
 else:
     print("no .cpp file found, exiting")
     exit()
 
-print("reading the compilation_options.json file")
+print("\n\nreading the compilation_options.json file")
 (compiler_op, linker_op) = load_options_form_json_file(actual_dir + '/' + "compilation_options.json")
 
 #creating the compiler command
@@ -115,7 +151,7 @@ if compiler_op.standard != "":
 if compiler_op.optimization != "":
     end_compiler_command += " -" + compiler_op.optimization
 end_compiler_command += " -fpermissive"
-print("\nusing the compiler command:")
+print("\ngenerated compiler command:")
 print(compiler_command + "xxx.cpp" + end_compiler_command + " -o obj/xxx.o")
 
 
@@ -135,23 +171,49 @@ for lib in linker_op.libs:
 
 linker_command += " -o " + linker_op.executable_name
 
-print("\nusing the linker command:")
+print("\ngenerated linker command:")
 print(linker_command)
 
-print("\nexecuting the compilation and linker command\n")
+print("\nstart compiling...\n")
 
 thread_pool = []
 
 for file in cpp_files:
-    final_command = compiler_command + file.replace(" ", "\\ ") + end_compiler_command + " -o obj/" + file.split("/")[-1][:-3]+"o"
-    thread_pool.append(CompilerThread(final_command))
-    thread_pool[-1].start()
-    print("command: " + final_command)
+    hash_file_path_base = "obj/hashes/" + file.split("/")[-1][:-3]
+    need_to_compile = False
+    if (path.exists(file[:-3]+"h")) and (not path.exists(hash_file_path_base+"h.hash")):
+        need_to_compile = True
+        f = open(hash_file_path_base+"h.hash", "x")
+        f.close()
+
+    if (not path.exists(hash_file_path_base+"cp.hash")):
+        need_to_compile = True
+        f = open(hash_file_path_base+"cp.hash", "x")
+        f.close()
+
+    if (path.exists(file[:-3]+"h")) and (not compare_file_hashes(file[:-3]+"h", hash_file_path_base+"h.hash")):
+        need_to_compile = True
+        update_hash_file(file[:-3]+"h", hash_file_path_base+"h.hash")
+
+    if (not compare_file_hashes(file, hash_file_path_base+"cp.hash")):
+        need_to_compile = True
+        update_hash_file(file, hash_file_path_base+"cp.hash")
+    
+    if need_to_compile:
+        final_command = compiler_command + file.replace(" ", "\\ ") + end_compiler_command + " -o obj/" + file.split("/")[-1][:-3]+"o"
+        thread_pool.append(CompilerThread(final_command))
+        thread_pool[-1].start()
+        print("compiling file: " + file.split("/")[-1])
+    else:
+        print("compilation isn't needed for the file: " + file.split("/")[-1])
 
 for thread in thread_pool:
     thread.join()
+print("\ncompilation finished\n")
 
+print("\nstart linking..\n")
 exec_command(linker_command)
+print("\nlinker finished")
 
 if len(sys.argv) >1 and sys.argv[1] == "-run":
     print("\nrunning "+ linker_op.executable_name)
