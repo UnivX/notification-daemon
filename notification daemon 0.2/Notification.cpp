@@ -28,8 +28,10 @@ void Notification::RenderAll(OverlayWindow& window)
 {
 	//for all the objects in the layer draw to the window
 	auto vector = this->baseLayer.GetVector();
-	for (int i = 0; i < vector->size(); i++)
+	for (int i = 0; i < vector->size(); i++){
+		(*vector)[i].first->Update();
 		window.draw(*(*vector)[i].first->GetDrawableObject());
+	}
 }
 
 void Notification::Update(float deltaTime)

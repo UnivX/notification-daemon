@@ -1,5 +1,8 @@
 #include "SocketThread.h"
 #include <iostream>
+#ifdef SFML_SYSTEM_LINUX
+#include <X11/Xlib.h>
+#endif
 
 #ifndef SFML_SYSTEM_LINUX
 SocketThread::SocketThread(PCSTR port, int bufferLenght, std::function<void(std::atomic<int>& returnCode, std::atomic<int>& connectionStatus, SocketThread& thread)> internFunction)
@@ -16,6 +19,8 @@ SocketThread::SocketThread(int port, int bufferLenght, std::function<void(std::a
 	this->port = port;
 	this->bufferLenght = bufferLenght;
 	this->internFunction = internFunction;
+	this->returnCode = SOCKET_THREAD_NO_ERROR;
+	this->connectionStatus = SOCKET_STATUS_NOT_CONNECTED;
 }
 
 #endif
@@ -143,6 +148,7 @@ void SocketThread::MainLoop()
 #else
 	void SocketThread::MainLoop()
 {
+	XInitThreads();
 	this->returnCode = SOCKET_THREAD_NO_ERROR;
 	//try to connect
 	this->Connect();
@@ -242,7 +248,7 @@ void SocketThread::Connect()
 	if (setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&tr,sizeof(int)) == -1) {
 		perror("setsockopt");
 		exit(1);
-}
+	}
 
     // clear address structure
     bzero((char *) &serv_addr, sizeof(serv_addr));

@@ -114,6 +114,7 @@ class CompilerThread (Thread):
     def run(self):
         exec_command(self.command)
 
+#if the dirs are does not exist create them
 if not path.exists("obj"):
     os.system("mkdir obj")
 
@@ -123,6 +124,7 @@ if not path.exists("obj/hashes"):
 actual_dir = os.getcwd()
 print("finding files in this directory and subdirectories with .cpp extension\nfiles:")
 
+#find all .cpp files in all the subdirectories
 cpp_files = filter_string_if_contains(get_all_files_in_dir_root(actual_dir), [".cpp"])
 if cpp_files != None:
     for file in cpp_files:
@@ -145,12 +147,15 @@ end_compiler_command = ""
 for include_path in compiler_op.include_paths:
     end_compiler_command += " -I" + include_path
 
+#adding to the compilation command the compiler standard option
 if compiler_op.standard != "":
     end_compiler_command += " -std=" + compiler_op.standard
 
+#adding to the compilation command the compiler optimization option
 if compiler_op.optimization != "":
     end_compiler_command += " -" + compiler_op.optimization
 end_compiler_command += " -fpermissive"
+
 print("\ngenerated compiler command:")
 print(compiler_command + "xxx.cpp" + end_compiler_command + " -o obj/xxx.o")
 
@@ -160,15 +165,19 @@ print(compiler_command + "xxx.cpp" + end_compiler_command + " -o obj/xxx.o")
 #creating the linker command
 linker_command = "g++"
 
+#add to the linker command all the cpp files
 for file in cpp_files:
     linker_command += " obj/" + file.split("/")[-1][:-3]+"o"
 
+#add to the linker command all the library paths
 for lib_path in linker_op.library_paths:
     linker_command += " -L" + lib_path
 
+#add to the linker command all the library in the compilation options
 for lib in linker_op.libs:
     linker_command += " -l" + lib
 
+#add to the linker command the name of the executable
 linker_command += " -o " + linker_op.executable_name
 
 print("\ngenerated linker command:")
@@ -181,24 +190,30 @@ thread_pool = []
 for file in cpp_files:
     hash_file_path_base = "obj/hashes/" + file.split("/")[-1][:-3]
     need_to_compile = False
+    #check if the corresponding hash file for the .h file exist if not create the file and recompile
     if (path.exists(file[:-3]+"h")) and (not path.exists(hash_file_path_base+"h.hash")):
         need_to_compile = True
         f = open(hash_file_path_base+"h.hash", "x")
         f.close()
 
+    #same thing as fot the previous if but with the .cpp file
     if (not path.exists(hash_file_path_base+"cp.hash")):
         need_to_compile = True
         f = open(hash_file_path_base+"cp.hash", "x")
         f.close()
 
+    #check if the hash of .h and the hash of saved in the file are the same, if not update the hash in the file and recompile
+    #if the hash isn't the same it's because the file has changed from the last compilation
     if (path.exists(file[:-3]+"h")) and (not compare_file_hashes(file[:-3]+"h", hash_file_path_base+"h.hash")):
         need_to_compile = True
         update_hash_file(file[:-3]+"h", hash_file_path_base+"h.hash")
 
+    #same thing as the previous if but with the .cpp file
     if (not compare_file_hashes(file, hash_file_path_base+"cp.hash")):
         need_to_compile = True
         update_hash_file(file, hash_file_path_base+"cp.hash")
     
+    #if compilation id needed recompile the file
     if need_to_compile:
         final_command = compiler_command + file.replace(" ", "\\ ") + end_compiler_command + " -o obj/" + file.split("/")[-1][:-3]+"o"
         thread_pool.append(CompilerThread(final_command))
@@ -207,6 +222,7 @@ for file in cpp_files:
     else:
         print("compilation isn't needed for the file: " + file.split("/")[-1])
 
+#wait until all the threads have finished running the compilation command
 for thread in thread_pool:
     thread.join()
 print("\ncompilation finished\n")
@@ -215,6 +231,7 @@ print("\nstart linking..\n")
 exec_command(linker_command)
 print("\nlinker finished")
 
+#if in the arguments list there is the -run option run the executable after the compilation has finished
 if len(sys.argv) >1 and sys.argv[1] == "-run":
     print("\nrunning "+ linker_op.executable_name)
     exec_command("./" + linker_op.executable_name)

@@ -255,6 +255,7 @@ TextBoxObject::TextBoxObject(sf::Font* font)
 {
 	this->text.setFont(*font);
 	this->text.setStyle(sf::Text::Regular);
+	this->needUpdate = false;
 }
 
 bool TextBoxObject::ChangeValue(std::string value_name, std::string value)
@@ -312,13 +313,13 @@ void TextBoxObject::SetBoxSize(sf::Vector2f size)
 void TextBoxObject::SetString(std::string str)
 {
 	this->text.setString(str);
-	this->UpdateString();
+	this->needUpdate = true;
 }
 
 void TextBoxObject::SetWString(std::wstring str)
 {
 	this->text.setString(str);
-	this->UpdateString();
+	this->needUpdate = true;
 }
 
 void TextBoxObject::SetOutLineThickness(float thickness)
@@ -343,13 +344,16 @@ void TextBoxObject::SetFont(sf::Font * font)
 
 void TextBoxObject::UpdateString()
 {
+	//actualy brokern in linux
 	//algorithm for auto return the text
 	sf::String string = this->text.getString();
 	float position_x = 0;
 	float position_y = 0;
+	std::cout << "fuck-init " << string.getSize() << "\n";
 	for (size_t i = 0; i < string.getSize(); i++) {
-		sf::Glyph glyph= this->text.getFont()->getGlyph(string[i], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold);
-		
+		std::cout << "fuck-inizio " << i << "text: "<< string[i] << std::endl;
+		sf::Glyph glyph;
+
 		if(string[i] == '\n'){
 			position_x = 0;
 			position_y += position_y += glyph.bounds.height + this->text.getLineSpacing();
@@ -358,8 +362,10 @@ void TextBoxObject::UpdateString()
 		else if(string[i] == ' ')
 			position_x += this->text.getLetterSpacing();
 		
-		else
+		else{
+			glyph= this->text.getFont()->getGlyph(string[i], this->text.getCharacterSize(), this->text.getStyle() == sf::Text::Bold);
 			position_x += glyph.advance;
+		}
 		
 		if (position_x > this->boxSize.x) {
 			string.insert(i - 1, "-\n");
@@ -373,7 +379,14 @@ void TextBoxObject::UpdateString()
 			string += "...";
 			break;
 		}
-
+		std::cout << "fuck-fine " << i << std::endl;
 	}
 	this->text.setString(string);
+}
+
+void TextBoxObject::Update(){
+	if(this->needUpdate){
+		this->UpdateString();
+		this->needUpdate = false;
+	}
 }

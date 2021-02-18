@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-
+#include <atomic>
 /*
 this is a pure virtual class, is the base for rendering objects
 all the memory gestion is responsibility of the derived class
@@ -21,6 +21,7 @@ public:
 	virtual sf::Drawable* GetDrawableObject() = 0;
 	virtual sf::Transformable* GetTransformableObject() = 0;
 	virtual RenderingObject* CreateDynamicCopy() = 0;
+	virtual void Update() {};
 	virtual bool ChangeValue(std::string value_name, std::string value) { return false; };
 	std::string GetName();
 	void SetName(std::string name);
@@ -96,12 +97,14 @@ public:
 	void SetFillColor(sf::Color color);
 	void SetOutLineColor(sf::Color color);
 	void SetFont(sf::Font* font);
+	void Update();
 	RenderingObject* CreateDynamicCopy() { return new TextBoxObject(*this); };
 	ObjectType GetType() { return ObjectType::ObjText; };
 private:
 	void UpdateString();
 	sf::Vector2f boxSize;
 	sf::Text text;
+	bool needUpdate;
 };
 
 /*

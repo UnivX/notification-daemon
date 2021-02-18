@@ -140,7 +140,8 @@ void Api::ElaborateMessage(std::string msg, SocketThread& thread)
 		response = this->AddTextToNotificationResource(msg);
 
 	else if (code == "add_text_box_to_notification_resource")
-		response = "{\"return_status\":\"failed\", \"error\":\"TODO method called\"}";//TODO
+		response = this->AddTextBoxToNotificationResource(msg);
+		//response = "{\"return_status\":\"failed\", \"error\":\"TODO method called\"}";//TODO
 
 	else if (code == "end_notification_resource_creation")
 		response = this->EndNotificationResourceCreation(msg);
@@ -212,11 +213,19 @@ std::string Api::EndNotificationResourceCreation(std::string msg)
 {
 	if(tempNotificationPtr == nullptr)
 		return "{\"return_status\":\"failed\"}";
-	auto resource = std::make_shared<NotificationBluePrintResource>(tempNotififcatonBluePrintName);
-	resource->LoadFromNotification(tempNotificationPtr);
-	resourceManagerInstance->GetListByName("NotificationBluePrints")->AddResource(resource);
-	tempNotificationPtr = nullptr;//the owner of tempNotificationPtr is the new resource
-	return "{\"return_status\":\"done\"}";
+	try
+	{
+		auto resource = std::make_shared<NotificationBluePrintResource>(tempNotififcatonBluePrintName);
+		resource->LoadFromNotification(tempNotificationPtr);
+		resourceManagerInstance->GetListByName("NotificationBluePrints")->AddResource(resource);
+		tempNotificationPtr = nullptr;//the owner of tempNotificationPtr is the new resource
+		return "{\"return_status\":\"done\"}";
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		return "{\"return_status\":\"failed\"}";
+	}
 }
 
 std::string Api::LoadTextureResource(std::string msg)
